@@ -1,0 +1,40 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'maven'
+    id 'idea'
+    id 'eclipse'
+}
+
+apply plugin: "com.github.hierynomus.license"
+
+defaultTasks 'licenseFormat', 'build'
+
+group = "com.ichorpowered"
+version = "1.0.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/groups/public/' }
+}
+
+dependencies {
+    compileOnly 'org.checkerframework:checker-qual:2.4.0'
+    compileOnly 'com.google.guava:guava:21.0'
+}
+
+apply from: project.file("gradle/implementation.gradle")
+apply from: project.file("gradle/publish.gradle")
+
+build.dependsOn(sourceJar)
+build.dependsOn(jar)
