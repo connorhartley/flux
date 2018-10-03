@@ -131,7 +131,7 @@ public class State<E> implements ContainerHolder {
      * @return the element if present, otherwise default element
      */
     public @NonNull E get() {
-        return this.element == null ? this.key.element() : this.element;
+        return this.element == null ? this.key.defaultElement() : this.element;
     }
 
     /**
@@ -151,7 +151,7 @@ public class State<E> implements ContainerHolder {
      * @return the default element
      */
     public @NonNull E getDefault() {
-        return this.key.element();
+        return this.key.defaultElement();
     }
 
     /**

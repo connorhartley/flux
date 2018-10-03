@@ -57,7 +57,7 @@ public class StateContainer implements ContainerHolder {
 
     /**
      * Returns a new {@link StateContainer} with meta
-     * updates from the provided {@link MetaHolder}.
+     * tags from the provided {@link MetaHolder}.
      *
      * @param metaHolder the provided meta holder
      * @return the new state container

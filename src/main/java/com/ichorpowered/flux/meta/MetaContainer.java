@@ -31,20 +31,51 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Represents a simple implementation of {@link MetaHolder}
+ * that contains label value pairs called tags.
+ */
 public class MetaContainer implements MetaHolder {
 
+    /**
+     * Returns a new {@link MetaContainer.Builder}.
+     *
+     * @return the new meta container builder
+     */
     public static MetaContainer.Builder builder() {
         return new MetaContainer.Builder();
     }
 
+    /**
+     * Returns a new {@link MetaContainer} with meta
+     * tags from the provided {@link MetaHolder}.
+     *
+     * @param metaHolder the provided meta holder
+     * @return the new meta container
+     */
     public static MetaContainer copyOf(final @NonNull MetaHolder metaHolder) {
         return new MetaContainer.Builder().of(metaHolder).build();
     }
 
+    /**
+     * Returns a new {@link MetaContainer} with the
+     * provided meta label.
+     *
+     * @param label the provided meta label
+     * @return the new meta container
+     */
     public static MetaContainer of(final @NonNull String label) {
         return new MetaContainer.Builder().label(label).build();
     }
 
+    /**
+     * Returns a new {@link MetaContainer} with the
+     * provided meta tag.
+     *
+     * @param label the provided meta label
+     * @param value the provided meta value
+     * @return the new meta container
+     */
     public static MetaContainer of(final @NonNull String label, final @NonNull String value) {
         return new MetaContainer.Builder().tag(label, value).build();
     }
@@ -114,27 +145,61 @@ public class MetaContainer implements MetaHolder {
                 .toString();
     }
 
+    /**
+     * Represents a way to create {@link MetaContainer}s
+     * through this builders provided options.
+     */
     public static class Builder {
 
         private final Map<String, String> tags = new HashMap<>();
 
         private Builder() {}
 
+        /**
+         * Returns this builder and collects the tags of
+         * the other {@link MetaHolder} and copies them
+         * over to the new {@link MetaContainer} this
+         * will create.
+         *
+         * @param other the other meta holder
+         * @return this builder
+         */
         public @NonNull Builder of(final @NonNull MetaHolder other) {
             this.tags.putAll(other.tags());
             return this;
         }
 
+        /**
+         * Returns this builder and adds the label to the
+         * new {@link MetaContainer} to be created.
+         *
+         * @param label the meta label
+         * @return this builder
+         */
         public @NonNull Builder label(final @NonNull String label) {
             this.tags.put(label, "");
             return this;
         }
 
+        /**
+         * Returns this builder and adds the tag to the
+         * new {@link MetaContainer} to be created.
+         *
+         * @param label the meta label
+         * @param value the meta value
+         * @return this builder
+         */
         public @NonNull Builder tag(final @NonNull String label, final @NonNull String value) {
             this.tags.put(label, value);
             return this;
         }
 
+        /**
+         * Returns the new {@link MetaContainer} from the
+         * provided options in this builder.
+         *
+         * @return the new meta container
+         */
         public @NonNull MetaContainer build() {
             return new MetaContainer(this);
         }
