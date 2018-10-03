@@ -20,8 +20,10 @@ apply plugin: "com.github.hierynomus.license"
 
 defaultTasks 'licenseFormat', 'build'
 
-group = "com.ichorpowered"
-version = "1.0.0-SNAPSHOT"
+group = project.group
+archivesBaseName = project.name
+
+version = project.version
 
 repositories {
     mavenCentral()

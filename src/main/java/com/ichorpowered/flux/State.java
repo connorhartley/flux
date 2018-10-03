@@ -35,16 +35,58 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Represents an element {@code E} in a specific state. Whether
+ * it contains an immutable or mutable object is up to the way
+ * it is used, stored and accessed, there is no defined limitation,
+ * but recommend immutability if possible.
+ *
+ * @param <E> the contained object type
+ */
 public class State<E> implements ContainerHolder {
 
+    /**
+     * Returns a new {@link State.Builder}.
+     *
+     * @param <A> the contained object type
+     * @return the new state builder
+     */
     public static <A> State.Builder<A> builder() {
         return new State.Builder<>();
     }
 
+    /**
+     * Returns a new {@link State} with meta updates from
+     * the provided {@link MetaHolder}.
+     *
+     * @param metaHolder the provided meta holder
+     * @param <A> the contained object type
+     * @return the new state
+     */
+    public static <A> State<A> copyOf(final @NonNull MetaHolder metaHolder) {
+        return new State.Builder<A>().of(metaHolder).build();
+    }
+
+    /**
+     * Returns a new {@link State} with the provided key.
+     *
+     * @param key the provided key
+     * @param <A> the contained object type
+     * @return the new state
+     */
     public static <A> State<A> of(final @NonNull StateKey<A> key) {
         return new State.Builder<A>().key(key).build();
     }
 
+    /**
+     * Returns a new {@link State} with the provided key
+     * and element.
+     *
+     * @param key the provided key
+     * @param element the provided element
+     * @param <A> the contained object type
+     * @return the new state
+     */
     public static <A> State<A> of(final @NonNull StateKey<A> key, final @NonNull A element) {
         return new State.Builder<A>().key(key).element(element).build();
     }
@@ -70,26 +112,65 @@ public class State<E> implements ContainerHolder {
         this.updateTags();
     }
 
+    /**
+     * Returns the associated key, with element type
+     * and other identification for this {@link State}
+     * and {@code E} element.
+     *
+     * @return the associated key for this state
+     */
     public @NonNull StateKey<E> key() {
         return this.key;
     }
 
+    /**
+     * Returns the {@code E} element if present, otherwise
+     * returns the default element inside the associated
+     * {@link StateKey} for this {@link State}.
+     *
+     * @return the element if present, otherwise default element
+     */
     public @NonNull E get() {
         return this.element == null ? this.key.element() : this.element;
     }
 
+    /**
+     * Returns the {@code E} element through an {@link Optional}
+     * if it is present, otherwise returns empty.
+     *
+     * @return the element if present, otherwise empty
+     */
     public @NonNull Optional<E> getDirect() {
         return Optional.ofNullable(this.element);
     }
 
+    /**
+     * Returns the {@code E} default element from the
+     * associated {@link StateKey}.
+     *
+     * @return the default element
+     */
     public @NonNull E getDefault() {
         return this.key.element();
     }
 
+    /**
+     * Returns the previous {@code E} element through an
+     * {@link Optional} if it is preset, otherwise returns empty.
+     *
+     * @return the previous element if present, otherwise empty
+     */
     public @NonNull Optional<E> previous() {
         return Optional.ofNullable(this.previousElement);
     }
 
+    /**
+     * Returns a new {@link State} with the provided {@code E} element,
+     * and this {@link State} element as the previous element.
+     *
+     * @param element the provided element
+     * @return the new state, with the provided element
+     */
     public @NonNull State<E> set(final @NonNull E element) {
         return new Builder<E>().of(this)
                 .key(this.key)
@@ -216,6 +297,12 @@ public class State<E> implements ContainerHolder {
                 .toString();
     }
 
+    /**
+     * Represents a way to create {@link State}s through
+     * this builders provided options.
+     *
+     * @param <E> the contained object type
+     */
     public static class Builder<E> {
 
         private final Map<String, String> tags = new HashMap<>();
@@ -226,36 +313,87 @@ public class State<E> implements ContainerHolder {
 
         private Builder() {}
 
+        /**
+         * Returns this builder and collects the tags of
+         * the other {@link MetaHolder} and copies them
+         * over to the new {@link State} this will create.
+         *
+         * @param other the other meta holder
+         * @return this builder
+         */
         public @NonNull Builder<E> of(final @NonNull MetaHolder other) {
             this.tags.putAll(other.tags());
             return this;
         }
 
+        /**
+         * Returns this builder and adds the label to the
+         * new {@link State} to be created.
+         *
+         * @param label the meta label
+         * @return this builder
+         */
         public @NonNull Builder<E> label(final @NonNull String label) {
             this.tags.put(label, "");
             return this;
         }
 
+        /**
+         * Returns this builder and adds the tag to the
+         * new {@link State} to be created.
+         *
+         * @param label the meta label
+         * @param value the meta value
+         * @return this builder
+         */
         public @NonNull Builder<E> tag(final @NonNull String label, final @NonNull String value) {
             this.tags.put(label, value);
             return this;
         }
 
+        /**
+         * Returns this builder and adds the key to the
+         * new {@link State} to represent the contained
+         * object this builder will create.
+         *
+         * @param key the state key
+         * @return this builder
+         */
         public @NonNull Builder<E> key(final @NonNull StateKey<E> key) {
             this.key = key;
             return this;
         }
 
+        /**
+         * Returns this builder and adds the element to the
+         * new {@link State} to be created.
+         *
+         * @param element the state element
+         * @return this builder
+         */
         public @NonNull Builder<E> element(final @NonNull E element) {
             this.element = element;
             return this;
         }
 
+        /**
+         * Returns this builder and adds the previous element
+         * to the new {@link State} to be created.
+         *
+         * @param previousElement the previous state element
+         * @return this builder
+         */
         public @NonNull Builder<E> previousElement(final @NonNull E previousElement) {
             this.previousElement = previousElement;
             return this;
         }
 
+        /**
+         * Returns the new {@link State} from the provided
+         * options in this builder.
+         *
+         * @return the new state
+         */
         public @NonNull State<E> build() {
             return new State<>(this);
         }

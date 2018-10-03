@@ -40,20 +40,51 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Represents a {@link ContainerHolder} of {@link StateContainer}s
+ * and {@link State}s.
+ */
 public class StateContainer implements ContainerHolder {
 
+    /**
+     * Returns a new {@link StateContainer.Builder}.
+     *
+     * @return the new state container builder
+     */
     public static StateContainer.Builder builder() {
         return new StateContainer.Builder();
     }
 
+    /**
+     * Returns a new {@link StateContainer} with meta
+     * updates from the provided {@link MetaHolder}.
+     *
+     * @param metaHolder the provided meta holder
+     * @return the new state container
+     */
     public static StateContainer copyOf(final @NonNull MetaHolder metaHolder) {
         return new StateContainer.Builder().of(metaHolder).build();
     }
 
+    /**
+     * Returns a new {@link StateContainer} with the
+     * provided meta label.
+     *
+     * @param label the provided meta label
+     * @return the new state container
+     */
     public static StateContainer of(final @NonNull String label) {
         return new StateContainer.Builder().label(label).build();
     }
 
+    /**
+     * Returns a new {@link StateContainer} with the
+     * provided meta tag.
+     *
+     * @param label the provided meta label
+     * @param value the provided meta value
+     * @return the new state container
+     */
     public static StateContainer of(final @NonNull String label, final @NonNull String value) {
         return new StateContainer.Builder().tag(label, value).build();
     }
@@ -73,10 +104,26 @@ public class StateContainer implements ContainerHolder {
         this.updateTags();
     }
 
+    /**
+     * Returns the first item of type {code T} in
+     * this container.
+     *
+     * @param <I> the contained item type
+     * @return the item if present, otherwise empty
+     */
     public <I extends ContainerHolder> @NonNull Optional<I> first() {
         return Optional.ofNullable((I) this.items.get(0));
     }
 
+    /**
+     * Returns the first result of type {code T} in
+     * this container, that matches the provided
+     * {@link MetaQuery}.
+     *
+     * @param query the provided meta query
+     * @param <I> the contained item type
+     * @return the item if present, otherwise empty
+     */
     public <I extends ContainerHolder> @NonNull Optional<I> queryOne(final @NonNull MetaQuery query) {
         return this.items.stream()
                 .filter(query::test)
@@ -84,6 +131,15 @@ public class StateContainer implements ContainerHolder {
                 .findFirst();
     }
 
+    /**
+     * Returns a collection of results under the type
+     * {code T} in this container, that match the
+     * provided {@link MetaQuery}.
+     *
+     * @param query the provided meta query
+     * @param <I> the contained item type
+     * @return the collection of items if present, otherwise empty collection
+     */
     public <I extends ContainerHolder> @NonNull Collection<I> queryMany(final @NonNull MetaQuery query) {
         return this.items.stream()
                 .filter(query::test)
@@ -91,40 +147,75 @@ public class StateContainer implements ContainerHolder {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the first {@link State} in this container,
+     * that matches the provided {@link MetaQuery}.
+     *
+     * @param query the provided meta query
+     * @param <E> the contained object type
+     * @return the state if present, otherwise empty
+     */
     public <E> @NonNull Optional<State<E>> queryOne(final @NonNull MetaQuery query, final @NonNull StateKey<E> key) {
         return this.items.stream()
                 .filter(query::test)
                 .filter(item -> {
                     if (!(item instanceof State<?>)) return false;
-                    return key.equals(((State<E>) item).key());
+                    return key.equals(((State<?>) item).key());
                 })
                 .map(item -> (State<E>) item)
                 .findFirst();
     }
 
+    /**
+     * Returns a collection of {@link State}s in this
+     * container, that match the provided {@link MetaQuery}.
+     *
+     * @param query the provided meta query
+     * @param <E> the contained object type
+     * @return the collection of items if present, otherwise empty collection
+     */
     public <E> @NonNull Collection<State<E>> queryMany(final @NonNull MetaQuery query, final @NonNull StateKey<E> key) {
         return this.items.stream()
                 .filter(query::test)
                 .filter(item -> {
                     if (!(item instanceof State<?>)) return false;
-                    return key.equals(((State<E>) item).key());
+                    return key.equals(((State<?>) item).key());
                 })
                 .map(item -> (State<E>) item)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the provided {@link State} after it is
+     * added to this container.
+     *
+     * @param key the provided state key
+     * @param state the provided state
+     * @param <E> the contained object type
+     * @return the provided state
+     */
     public <E> @NonNull State<E> offer(final @NonNull StateKey<E> key, final @NonNull State<E> state) {
-        this.items.removeIf(item -> (item instanceof State<?>) && item.containsAll(state) && key.equals(((State<E>) item).key()));
+        this.items.removeIf(item -> (item instanceof State<?>) && item.containsAll(state) && key.equals(((State<?>) item).key()));
+
         state.setParent(this);
         this.items.add(state);
         return state;
     }
 
+    /**
+     * Returns the {@code E} element if present, otherwise
+     * returns the default element inside the associated
+     * {@link StateKey} for this {@link State}.
+     *
+     * @param key the provided state key
+     * @param <E> the contained object type
+     * @return the element if present, otherwise default element
+     */
     public <E> @NonNull Optional<E> get(final @NonNull StateKey<E> key) {
         return this.items.stream()
                 .filter(item -> {
                     if (!(item instanceof State<?>)) return false;
-                    return key.equals(((State<E>) item).key());
+                    return key.equals(((State<?>) item).key());
                 })
                 .map(item -> ((State<E>) item).get())
                 .findFirst();
@@ -258,27 +349,61 @@ public class StateContainer implements ContainerHolder {
                 .toString();
     }
 
+    /**
+     * Represents a way to create {@link StateContainer}s
+     * through this builders provided options.
+     */
     public static class Builder {
 
         private final Map<String, String> tags = new HashMap<>();
 
         private Builder() {}
 
+        /**
+         * Returns this builder and collects the tags of
+         * the other {@link MetaHolder} and copies them
+         * over to the new {@link StateContainer} this
+         * will create.
+         *
+         * @param other the other meta holder
+         * @return this builder
+         */
         public @NonNull Builder of(final @NonNull MetaHolder other) {
             this.tags.putAll(other.tags());
             return this;
         }
 
+        /**
+         * Returns this builder and adds the label to the
+         * new {@link StateContainer} to be created.
+         *
+         * @param label the meta label
+         * @return this builder
+         */
         public @NonNull Builder label(final @NonNull String label) {
             this.tags.put(label, "");
             return this;
         }
 
+        /**
+         * Returns this builder and adds the tag to the
+         * new {@link StateContainer} to be created.
+         *
+         * @param label the meta label
+         * @param value the meta value
+         * @return this builder
+         */
         public @NonNull Builder tag(final @NonNull String label, final @NonNull String value) {
             this.tags.put(label, value);
             return this;
         }
 
+        /**
+         * Returns the new {@link StateContainer} from the
+         * provided options in this builder.
+         *
+         * @return the new state container
+         */
         public @NonNull StateContainer build() {
             return new StateContainer(this);
         }
