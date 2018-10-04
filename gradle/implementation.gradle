@@ -14,6 +14,17 @@ jar {
     classifier = ''
 }
 
+javadoc {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.links(
+            'https://google.github.io/guava/releases/21.0/api/docs/',
+    )
+
+    // Disable the crazy super-strict doclint tool in Java 8
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
 task sourceJar(type: Jar) {
     classifier = 'source'
     from sourceSets.main.allSource
@@ -25,6 +36,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
+    archives javadocJar
     archives sourceJar
     archives jar
 }
