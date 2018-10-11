@@ -1,12 +1,12 @@
+apply plugin: 'maven'
 apply plugin: 'maven-publish'
-
 
 if (System.env.TRAVIS && !Boolean.valueOf(System.env.TRAVIS_PULL_REQUEST)) {
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: 'http://repo.foxdenstudio.net/repository/maven-vectrix/') {
-                    authentication(userName: System.env.NEXUS_USER, password: System.env.NEXUS_PASS)
+                repository(url: 'http://maven.ichorpowered.com/repository/maven-snapshots/') {
+                    authentication(userName: System.env.MAVEN_USER, password: System.env.MAVEN_PASS)
                 }
 
                 pom.project {
@@ -21,13 +21,13 @@ if (System.env.TRAVIS && !Boolean.valueOf(System.env.TRAVIS_PULL_REQUEST)) {
 
                     issueManagement {
                         system 'Github Issues'
-                        url 'https://github.com/ichorpowered/flux/issues'
+                        url 'https://github.com/ichorpowered/guardian/issues'
                     }
 
                     scm {
-                        connection 'scm:git@github.com/ichorpowered/flux.git'
-                        developerConnection 'scm:git@github.com/ichorpowered/flux.git'
-                        url 'https://github.com/ichorpowered/flux/'
+                        connection 'scm:git@github.com/ichorpowered/guardian.git'
+                        developerConnection 'scm:git@github.com/ichorpowered/guardian.git'
+                        url 'https://github.com/ichorpowered/guardian/'
                     }
                 }
             }
