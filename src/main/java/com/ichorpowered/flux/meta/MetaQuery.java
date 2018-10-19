@@ -124,7 +124,7 @@ public class MetaQuery {
     private final Map<String, String> tags = new HashMap<>();
     private final Map<String, String> requiredTags = new HashMap<>();
 
-    private MetaQuery(final MetaQuery.Builder builder) {
+    protected MetaQuery(final MetaQuery.Builder builder) {
         this.tags.putAll(builder.tags);
         this.requiredTags.putAll(builder.requiredTags);
     }
@@ -175,7 +175,7 @@ public class MetaQuery {
         private final Map<String, String> tags = new HashMap<>();
         private final Map<String, String> requiredTags = new HashMap<>();
 
-        private Builder() {}
+        protected Builder() {}
 
         /**
          * Returns this builder and collects the tags of

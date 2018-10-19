@@ -82,7 +82,7 @@ public class MetaContainer implements MetaHolder {
 
     private final Map<String, String> tags = new HashMap<>();
 
-    private MetaContainer(final MetaContainer.Builder builder) {
+    protected MetaContainer(final MetaContainer.Builder builder) {
         this.tags.putAll(builder.tags);
     }
 
@@ -153,7 +153,7 @@ public class MetaContainer implements MetaHolder {
 
         private final Map<String, String> tags = new HashMap<>();
 
-        private Builder() {}
+        protected Builder() {}
 
         /**
          * Returns this builder and collects the tags of

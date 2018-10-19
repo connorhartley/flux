@@ -102,7 +102,7 @@ public class State<E> implements ContainerHolder {
     private final E element;
     private final E previousElement;
 
-    private State(final State.Builder<E> builder) {
+    protected State(final State.Builder<E> builder) {
         this.localTags.putAll(builder.tags);
 
         this.key = builder.key;
@@ -311,7 +311,7 @@ public class State<E> implements ContainerHolder {
         private E element;
         private E previousElement;
 
-        private Builder() {}
+        protected Builder() {}
 
         /**
          * Returns this builder and collects the tags of

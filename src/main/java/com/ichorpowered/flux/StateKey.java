@@ -54,7 +54,7 @@ public class StateKey<E> {
     private final TypeToken<E> elementType;
     private final E defaultElement;
 
-    private StateKey(final StateKey.Builder<E> builder) {
+    protected StateKey(final StateKey.Builder<E> builder) {
         this.id = builder.id;
         this.name = builder.name;
         this.elementType = builder.elementType;
@@ -136,7 +136,7 @@ public class StateKey<E> {
         private TypeToken<E> elementType;
         private E element;
 
-        private Builder() {}
+        protected Builder() {}
 
         /**
          * Returns this builder and sets the {@link State}

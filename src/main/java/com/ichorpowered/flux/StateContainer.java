@@ -98,7 +98,7 @@ public class StateContainer implements ContainerHolder {
 
     private final List<MetaHolder> items = new ArrayList<>();
 
-    private StateContainer(final StateContainer.Builder builder) {
+    protected StateContainer(final StateContainer.Builder builder) {
         this.localTags.putAll(builder.tags);
 
         this.updateTags();
@@ -357,7 +357,7 @@ public class StateContainer implements ContainerHolder {
 
         private final Map<String, String> tags = new HashMap<>();
 
-        private Builder() {}
+        protected Builder() {}
 
         /**
          * Returns this builder and collects the tags of
