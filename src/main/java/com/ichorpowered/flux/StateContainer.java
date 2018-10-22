@@ -25,6 +25,7 @@ package com.ichorpowered.flux;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.ichorpowered.flux.meta.MetaHolder;
 import com.ichorpowered.flux.meta.MetaQuery;
@@ -32,13 +33,17 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Represents a {@link ContainerHolder} of {@link StateContainer}s
@@ -132,6 +137,32 @@ public class StateContainer implements ContainerHolder {
     }
 
     /**
+     * In the order of the provided queries, gets
+     * the first result for the first
+     * {@link MetaQuery}, the second result from
+     * that {@link StateContainer} for the second
+     * {@link MetaQuery} and so on, searching through
+     * the hierarchy for the first matching result.
+     *
+     * @param queries the provided meta queries
+     * @param <I> the contained item type
+     * @return the item if present, otherwise empty
+     */
+    public <I extends ContainerHolder> @NonNull Optional<I> queryOne(final @NonNull MetaQuery... queries) {
+        return this.items.stream()
+                .filter(queries[0]::test)
+                .map(item -> {
+                    if (item instanceof StateContainer) {
+                        return (I) ((StateContainer) item).queryOne(Arrays.copyOfRange(queries, 1, queries.length)).orElse(null);
+                    } else {
+                        return (I) item;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .findFirst();
+    }
+
+    /**
      * Returns a collection of results under the type
      * {code T} in this container, that match the
      * provided {@link MetaQuery}.
@@ -144,6 +175,33 @@ public class StateContainer implements ContainerHolder {
         return this.items.stream()
                 .filter(query::test)
                 .map(item -> (I) item)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * In the order of the provided queries, gets
+     * the first result for the first
+     * {@link MetaQuery}, the second result from
+     * that {@link StateContainer} for the second
+     * {@link MetaQuery} and so on, searching through
+     * the hierarchy for a {@link Collection} of
+     * matching results.
+     *
+     * @param queries the provided meta queries
+     * @param <I> the contained item type
+     * @return
+     */
+    public <I extends ContainerHolder> @NonNull Collection<I> queryMany(final @NonNull MetaQuery... queries) {
+        return this.items.stream()
+                .filter(queries[0]::test)
+                .flatMap(item -> {
+                    if (item instanceof StateContainer) {
+                        return (Stream<I>) ((StateContainer) item).queryMany(Arrays.copyOfRange(queries, 1, queries.length)).stream();
+                    } else {
+                        return (Stream<I>) Stream.of(item);
+                    }
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -203,6 +261,38 @@ public class StateContainer implements ContainerHolder {
     }
 
     /**
+     * Returns the {@link State} of type {@code E} if present,
+     * otherwise returns {@link Optional#empty()}.
+     *
+     * @param key the provided state key
+     * @param <E> the contained object type
+     * @return the state if present, otherwise empty
+     */
+    public <E> @NonNull Optional<State<E>> request(final @NonNull StateKey<E> key) {
+        return this.items.stream()
+                .filter(item -> {
+                    if (!(item instanceof State<?>)) return false;
+                    return key.equals(((State<?>) item).key());
+                })
+                .map(item -> (State<E>) item)
+                .findFirst();
+    }
+
+    /**
+     * Returns the {@link State} of type {@code E} if present,
+     * otherwise returns a default {@link State} created by the
+     * provided {@link StateKey}.
+     *
+     * @param key the provided state key
+     * @param <E> the contained object type
+     * @return the state if present, otherwise default state
+     */
+    public <E> @NonNull State<E> requestOrDefault(final @NonNull StateKey<E> key) {
+        final Optional<State<E>> state = this.request(key);
+        return state.orElseGet(() -> State.of(key));
+    }
+
+    /**
      * Returns the {@code E} element if present, otherwise
      * returns the default element inside the associated
      * {@link StateKey} for this {@link State}.
@@ -212,13 +302,16 @@ public class StateContainer implements ContainerHolder {
      * @return the element if present, otherwise default element
      */
     public <E> @NonNull Optional<E> get(final @NonNull StateKey<E> key) {
-        return this.items.stream()
+        final Optional<E> element = this.items.stream()
                 .filter(item -> {
                     if (!(item instanceof State<?>)) return false;
                     return key.equals(((State<?>) item).key());
                 })
                 .map(item -> ((State<E>) item).get())
                 .findFirst();
+
+        if (element.isPresent()) return element;
+        return Optional.of(key.defaultElement());
     }
 
     @Override
