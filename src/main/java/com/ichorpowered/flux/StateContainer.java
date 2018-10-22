@@ -191,14 +191,14 @@ public class StateContainer implements ContainerHolder {
      * @param <I> the contained item type
      * @return
      */
-    public <I extends ContainerHolder> @NonNull Collection<I> queryMany(final @NonNull MetaQuery... queries) {
+    public <I extends StateContainer> @NonNull Collection<I> queryMany(final @NonNull MetaQuery... queries) {
         return this.items.stream()
                 .filter(queries[0]::test)
                 .flatMap(item -> {
                     if (item instanceof StateContainer) {
                         return (Stream<I>) ((StateContainer) item).queryMany(Arrays.copyOfRange(queries, 1, queries.length)).stream();
                     } else {
-                        return (Stream<I>) Stream.of(item);
+                        return Stream.of((I) item);
                     }
                 })
                 .filter(Objects::nonNull)
